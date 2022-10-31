@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node src/index.js"
+    "start": "node src/index.js"
   },
   "repository": {
     "type": "git",
@@ -19,7 +19,9 @@
   "dependencies": {
     "catboys": "^1.0.6",
     "express": "^4.18.2",
-    "nekos.life": "^3.0.0"
+    "furry-wrapper": "^0.0.5",
+    "nekos.life": "^3.0.0",
+    "yiffy": "^2.0.16"
   },
   "devDependencies": {
     "eslint": "^8.26.0"

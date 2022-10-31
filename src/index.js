@@ -2,10 +2,13 @@ const express = require('express');
 const path = require('path');
 const catboys = require('catboys');
 const nekos = require('nekos.life');
+const Yiffy = require('yiffy');
+const { E6 } = require('furry-wrapper');
 
 const app = express();
 const neko = new nekos();
 const catboy = new catboys();
+const yiff = new Yiffy();
 
 const port = process.env.PORT || 5000;
 
@@ -14,16 +17,26 @@ let response = undefined;
 let coolResponse = undefined;
 
 async function processImage(blob) {
+    // What the fuck is this, please someone tell me there is a better way
     return await blob.arrayBuffer().then((arrayBuffer) => Buffer.from(arrayBuffer, 'binary'));
 }
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, './public/index.html'));
-});
+// This sucks, but work
+async function shitFunction(category) {
+    const category_list = {
+        'straight': await yiff.furry.yiff.straight('json'),
+        'gay': await yiff.furry.yiff.gay('json'),
+        'lesbian': await yiff.furry.yiff.lesbian('json'),
+        'gynomorph': await yiff.furry.yiff.gynomorph('json'),
+        'andromorph': await yiff.furry.yiff.andromorph('json'),
+    };
 
-app.get('/nsfw', async (req, res) => {
-    res.redirect(301, '/');
-});
+    return category_list[category];
+}
+
+app.get('/', (req, res) => { res.sendFile(path.join(__dirname, './public/index.html')); });
+
+app.get('/nsfw', async (req, res) => { res.redirect(301, '/'); });
 app.get('/nsfw/:category', async (req, res) => {
     const { category } = req.params;
 
@@ -44,6 +57,53 @@ app.get('/nsfw/:category', async (req, res) => {
     }
 
     (category === 'blowjob') ? res.contentType('image/gif') : res.contentType('image/png');
+    res.end(await processImage(await coolResponse.blob()));
+});
+
+app.get('/yiff', async (req, res) => { res.redirect(301, '/'); });
+app.get('/yiff/:category', async (req, res) => {
+    const { category } = req.params;
+
+    // It takes a little performance, but fuck it
+    if (!['straight', 'gay', 'lesbian', 'gynomorph', 'andromorph'].includes(category)) {
+        res.redirect(301, '/');
+    }
+
+    try {
+        response = await shitFunction(category);
+    } catch {
+        res.status(500).send({ message: 'Fail requesting image' });
+    }
+
+    try {
+        coolResponse = await fetch(response[0].url);
+    } catch {
+        res.status(500).send({ message: 'Fail fetching image' });
+    }
+
+    res.contentType('image/png');
+    res.end(await processImage(await coolResponse.blob()));
+});
+
+app.get('/yiff2', async (req, res) => { res.redirect(301, '/'); });
+app.get('/yiff2/:tags', async (req, res) => {
+    const { tags } = req.params;
+
+    // Try to request
+    // Why try? because the user can put a screwed up tag and fuck it all up
+    try {
+        response = (await E6.nsfw(tags)).file.url;
+    } catch {
+        res.status(500).send({ message: 'Fail requesting image' });
+    }
+
+    try {
+        coolResponse = await fetch(response);
+    } catch {
+        res.status(500).send({ message: 'Fail fetching image' });
+    }
+
+    res.contentType('image/png');
     res.end(await processImage(await coolResponse.blob()));
 });
 
@@ -88,10 +148,7 @@ app.get('/loli', async (req, res) => {
     res.end(await processImage(await coolResponse.blob()));
 });
 
-app.get('/count', async (req, res) => {
-    res.json({ count });
-});
-
+app.get('/count', async (req, res) => { res.json({ count }); });
 app.post('/count', async (req, res) => {
     ++count;
     res.json({ count });
