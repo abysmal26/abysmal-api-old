@@ -41,19 +41,19 @@ app.get('/nsfw/:category', async (req, res) => {
     const { category } = req.params;
 
     if (!['waifu', 'neko', 'trap', 'blowjob'].includes(category)) {
-        res.redirect(301, '/');
+        return res.redirect(301, '/');
     }
 
     try {
         response = await (await fetch(`https://api.waifu.pics/nsfw/${category}`)).json();
     } catch {
-        res.status(500).send({ message: 'Fail requesting image' });
+        return res.status(500).send({ message: 'Fail requesting image' });
     }
 
     try {
         coolResponse = await fetch(response.url);
     } catch {
-        res.status(500).send({ message: 'Fail fetching image' });
+        return res.status(500).send({ message: 'Fail fetching image' });
     }
 
     (category === 'blowjob') ? res.contentType('image/gif') : res.contentType('image/png');
@@ -66,19 +66,19 @@ app.get('/yiff/:category', async (req, res) => {
 
     // It takes a little performance, but fuck it
     if (!['straight', 'gay', 'lesbian', 'gynomorph', 'andromorph'].includes(category)) {
-        res.redirect(301, '/');
+        return res.redirect(301, '/');
     }
 
     try {
         response = await shitFunction(category);
     } catch {
-        res.status(500).send({ message: 'Fail requesting image' });
+        return res.status(500).send({ message: 'Fail requesting image' });
     }
 
     try {
         coolResponse = await fetch(response[0].url);
     } catch {
-        res.status(500).send({ message: 'Fail fetching image' });
+        return res.status(500).send({ message: 'Fail fetching image' });
     }
 
     res.contentType('image/png');
@@ -94,13 +94,13 @@ app.get('/yiff2/:tags', async (req, res) => {
     try {
         response = (await E6.nsfw(tags)).file.url;
     } catch {
-        res.status(500).send({ message: 'Fail requesting image' });
+        return res.status(500).send({ message: 'Fail requesting image' });
     }
 
     try {
         coolResponse = await fetch(response);
     } catch {
-        res.status(500).send({ message: 'Fail fetching image' });
+        return res.status(500).send({ message: 'Fail fetching image' });
     }
 
     res.contentType('image/png');
@@ -111,7 +111,7 @@ app.get('/catboy', async (req, res) => {
     try {
         response = await fetch((await catboy.image()).url);
     } catch {
-        res.status(500).send({ message: 'Fail fetching image' });
+        return res.status(500).send({ message: 'Fail fetching image' });
     }
 
     res.contentType('image/png');
@@ -122,7 +122,7 @@ app.get('/neko', async (req, res) => {
     try {
         response = await fetch((await neko.neko()).url);
     } catch {
-        res.status(500).res({ message: 'Fail fetching image' });
+        return res.status(500).res({ message: 'Fail fetching image' });
     }
 
     res.contentType('image/png');
@@ -135,13 +135,13 @@ app.get('/loli', async (req, res) => {
     try {
         response = await (await fetch(`https://lolibooru.moe/post/index.json?tags=nude&limit=${value}`)).json();
     } catch {
-        res.status(500).send({ message: 'Fail requesting image' });
+        return res.status(500).send({ message: 'Fail requesting image' });
     }
 
     try {
         coolResponse = await fetch(response[value - 1].file_url);
     } catch {
-        res.status(500).send({ message: 'Fail fetching image' });
+        return res.status(500).send({ message: 'Fail fetching image' });
     }
 
     res.contentType('image/png');
